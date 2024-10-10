@@ -1,0 +1,162 @@
+<%- include('parts/top.ejs')%>  
+<!-- Breadcrumb Start -->
+<div class="breadcrumb-wrap">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">Products</a></li>
+            <li class="breadcrumb-item active">Cart</li>
+        </ul>
+    </div>
+</div>
+<!-- Breadcrumb End -->
+
+<form id="checkoutForm" action="/index" method="post">
+    <!-- Hidden Inputs to store values for form submission -->
+    <input type="hidden" id="hidden-subtotal" name="subtotal">
+    <input type="hidden" id="hidden-shippingcost" name="shippingcost">
+    <input type="hidden" id="hidden-grandtotal" name="grandtotal">
+
+    <!-- Cart Start -->
+    <div class="cart-page">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="cart-page-inner">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="thead-dark">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th>Remove</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="align-middle">
+                                    <% if (cart.length > 0) { %>
+                                        <% cart.forEach(product => { %>
+                                            <tr data-id="<%= product._id %>" data-price="<%= product.prix %>">
+                                                <td>
+                                                    <div class="img">
+                                                        <a href="#"><img src="../img/<%= product.image %>" alt="Image"></a>
+                                                        <p><%= product.nom %></p>
+                                                    </div>
+                                                </td>
+                                                <td><%= product.prix %>DT</td>
+                                                <td>
+                                                    <div class="qty">
+                                                        <button class="btn-minus"><i class="fa fa-minus"></i></button>
+                                                        <input type="text" value="1" class="qty-input">
+                                                        <button class="btn-plus"><i class="fa fa-plus"></i></button>
+                                                    </div>
+                                                </td>
+                                                <td class="total-price"><%= product.prix %>DT</td>
+                                                <td>
+                                                    <a href="/remove-from-cart/<%= product._id %>" class="btn-remove"><i class="fa fa-trash"></i></a>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <p>Your Cart is empty.</p>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="cart-page-inner">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="coupon">
+                                    <input type="text" placeholder="Coupon Code">
+                                    <button>Apply Code</button>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="cart-summary">
+                                    <div class="cart-content">
+                                        <h1>Cart Summary</h1>
+                                        <p>Sub Total<span id="sub-total" name="subtotal">0DT</span></p>
+                                        <p>Shipping Cost<span id="shipping-cost" name="shippingcost">1DT</span></p>
+                                        <h2>Grand Total<span id="grand-total" name="grandtotal">1DT</span></h2>
+                                    </div>
+                                    <div class="cart-btn">
+                                        <button type="submit" class="btn-cart">Checkout</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!-- Cart End -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const shippingCost = 1; // Fixed shipping cost for simplicity
+
+    function updateTotalPrice(row) {
+        let price = parseFloat(row.dataset.price);
+        let qty = parseInt(row.querySelector('.qty-input').value);
+        let totalPriceElement = row.querySelector('.total-price');
+        totalPriceElement.textContent = (price * qty).toFixed(2) + 'DT';
+    }
+
+    function updateTotals() {
+        let subtotal = 0;
+        
+        document.querySelectorAll('tbody tr').forEach(row => {
+            if (row.dataset.price) {
+                let price = parseFloat(row.dataset.price);
+                let qty = parseInt(row.querySelector('.qty-input').value);
+                subtotal += price * qty;
+            }
+        });
+
+        document.getElementById('sub-total').textContent = subtotal.toFixed(2) + 'DT';
+        document.getElementById('shipping-cost').textContent = shippingCost.toFixed(2) + 'DT';
+        document.getElementById('grand-total').textContent = (subtotal + shippingCost).toFixed(2) + 'DT';
+    }
+
+    document.querySelectorAll('.btn-plus').forEach(button => {
+        button.addEventListener('click', function() {
+            let qtyInput = this.parentElement.querySelector('.qty-input');
+            qtyInput.value = parseInt(qtyInput.value) + 1;
+            updateTotalPrice(this.closest('tr'));
+            updateTotals();
+        });
+    });
+
+    document.querySelectorAll('.btn-minus').forEach(button => {
+        button.addEventListener('click', function() {
+            let qtyInput = this.parentElement.querySelector('.qty-input');
+            if (parseInt(qtyInput.value) > 1) {
+                qtyInput.value = parseInt(qtyInput.value) - 1;
+                updateTotalPrice(this.closest('tr'));
+                updateTotals();
+            }
+        });
+    });
+
+    updateTotals();
+
+    document.getElementById('checkoutForm').addEventListener('submit', function(event) {
+        // Get values from spans
+        const subtotal = document.getElementById('sub-total').innerText.replace('DT', '').trim();
+        const shippingCost = document.getElementById('shipping-cost').innerText.replace('DT', '').trim();
+        const grandTotal = document.getElementById('grand-total').innerText.replace('DT', '').trim();
+        
+        // Set values to hidden inputs
+        document.getElementById('hidden-subtotal').value = subtotal;
+        document.getElementById('hidden-shippingcost').value = shippingCost;
+        document.getElementById('hidden-grandtotal').value = grandTotal;
+    });
+});
+</script>
+<%- include('parts/last.ejs')%>

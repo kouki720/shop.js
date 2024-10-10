@@ -1,0 +1,38 @@
+<%- include('parts/top.ejs')%>   
+<!-- Breadcrumb Start -->
+<div class="breadcrumb-wrap">
+    <div class="container-fluid">
+        <ul class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item"><a href="#">Products</a></li>
+            <li class="breadcrumb-item active">Login & Register</li>
+        </ul>
+    </div>
+</div>
+<!-- Breadcrumb End -->
+
+<!-- Login Start -->
+<div class="login">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="login-form">
+                    <div class="row">
+                        <h1>Login</h1>
+                        <form action="/login" method="post"> <!-- Note the correct action URL -->
+                            <label for="email">Email:</label>
+                            <input type="email" name="email" required>
+                            <br>
+                            <label for="password">Password:</label>
+                            <input type="password" name="password" required>
+                            <br>
+                            <button type="submit">Login</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Login End -->
+<%- include('parts/last.ejs')%>  
